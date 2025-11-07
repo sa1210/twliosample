@@ -35,8 +35,8 @@ https://sakuma-pandatest.web.app
 ### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/sa1210/twliosample.git
-cd twliosample
+git clone https://github.com/sa1210/twiliosample.git
+cd twiliosample
 ```
 
 ### 2. 依存関係のインストール
