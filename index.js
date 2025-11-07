@@ -111,7 +111,7 @@ exports.sendVerificationCode = async (req, res) => {
       error: error.message || 'Failed to send verification code'
     });
   }
-});
+};
 
 /**
  * 認証コードを検証する Cloud Function
@@ -203,4 +203,4 @@ exports.verifyCode = async (req, res) => {
       error: error.message || 'Failed to verify code'
     });
   }
-});
+};
