@@ -1,5 +1,4 @@
 const admin = require('firebase-admin');
-const functions = require('firebase-functions');
 const twilio = require('twilio');
 
 // Firebase Admin初期化
@@ -27,7 +26,7 @@ function generateVerificationCode() {
  * - phoneNumber: 送信先の電話番号 (E.164形式: +819012345678)
  * - method: 送信方法 'sms' または 'voice'
  */
-exports.sendVerificationCode = functions.https.onRequest(async (req, res) => {
+exports.sendVerificationCode = async (req, res) => {
   // CORSヘッダーを設定
   res.set('Access-Control-Allow-Origin', '*');
 
@@ -121,7 +120,7 @@ exports.sendVerificationCode = functions.https.onRequest(async (req, res) => {
  * - phoneNumber: 電話番号 (E.164形式)
  * - code: 認証コード (6桁)
  */
-exports.verifyCode = functions.https.onRequest(async (req, res) => {
+exports.verifyCode = async (req, res) => {
   // CORSヘッダーを設定
   res.set('Access-Control-Allow-Origin', '*');
 
