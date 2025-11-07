@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>電話認証テスト</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #666;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      color: #333;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    input[type="tel"],
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    input[type="tel"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .method-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .method-btn {
+      flex: 1;
+      padding: 14px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.3s;
+      color: #666;
+    }
+
+    .method-btn:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+
+    .method-btn.active {
+      border-color: #667eea;
+      background: #667eea;
+      color: white;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 12px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #e0e0e0;
+    }
+
+    .verification-section {
+      display: none;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 2px solid #f0f0f0;
+    }
+
+    .verification-section.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .message.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .helper-text {
+      font-size: 12px;
+      color: #999;
+      margin-top: 6px;
+    }
+
+    .sent-info {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>電話認証テスト</h1>
+    <p class="subtitle">SMS または音声通話で認証コードを受け取ります</p>
+
+    <div id="messageArea"></div>
+
+    <!-- フェーズ1: 電話番号入力 -->
+    <div id="phoneSection">
+      <div class="form-group">
+        <label for="phoneNumber">電話番号</label>
+        <input
+          type="tel"
+          id="phoneNumber"
+          placeholder="+819012345678"
+          value="+81"
+        />
+        <p class="helper-text">国際形式で入力してください（例: +819012345678）</p>
+      </div>
+
+      <div class="form-group">
+        <label>認証方法を選択</label>
+        <div class="method-group">
+          <button class="method-btn active" data-method="sms" id="smsBtn">
+            📱 SMS
+          </button>
+          <button class="method-btn" data-method="voice" id="voiceBtn">
+            📞 音声通話
+          </button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="sendCodeBtn">
+        認証コードを送信
+      </button>
+    </div>
+
+    <!-- フェーズ2: 認証コード入力 -->
+    <div id="verificationSection" class="verification-section">
+      <div class="sent-info" id="sentInfo"></div>
+
+      <div class="form-group">
+        <label for="verificationCode">認証コード（6桁）</label>
+        <input
+          type="text"
+          id="verificationCode"
+          placeholder="123456"
+          maxlength="6"
+          pattern="[0-9]{6}"
+        />
+      </div>
+
+      <button class="btn btn-primary" id="verifyCodeBtn">
+        認証する
+      </button>
+      <button class="btn btn-secondary" id="resendBtn">
+        コードを再送信
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'https://asia-northeast1-sakuma-pandatest.cloudfunctions.net';
+
+    let selectedMethod = 'sms';
+    let currentPhoneNumber = '';
+
+    // 要素の取得
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const verificationCodeInput = document.getElementById('verificationCode');
+    const sendCodeBtn = document.getElementById('sendCodeBtn');
+    const verifyCodeBtn = document.getElementById('verifyCodeBtn');
+    const resendBtn = document.getElementById('resendBtn');
+    const smsBtn = document.getElementById('smsBtn');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const phoneSection = document.getElementById('phoneSection');
+    const verificationSection = document.getElementById('verificationSection');
+    const messageArea = document.getElementById('messageArea');
+    const sentInfo = document.getElementById('sentInfo');
+
+    // 送信方法の選択
+    smsBtn.addEventListener('click', () => {
+      selectedMethod = 'sms';
+      smsBtn.classList.add('active');
+      voiceBtn.classList.remove('active');
+    });
+
+    voiceBtn.addEventListener('click', () => {
+      selectedMethod = 'voice';
+      voiceBtn.classList.add('active');
+      smsBtn.classList.remove('active');
+    });
+
+    // メッセージ表示
+    function showMessage(message, type = 'info') {
+      messageArea.innerHTML = `<div class="message ${type} show">${message}</div>`;
+      setTimeout(() => {
+        const msg = messageArea.querySelector('.message');
+        if (msg) msg.classList.remove('show');
+      }, 5000);
+    }
+
+    // 認証コード送信
+    async function sendVerificationCode() {
+      const phoneNumber = phoneNumberInput.value.trim();
+
+      if (!phoneNumber) {
+        showMessage('電話番号を入力してください', 'error');
+        return;
+      }
+
+      if (!phoneNumber.startsWith('+')) {
+        showMessage('電話番号は+から始まる国際形式で入力してください', 'error');
+        return;
+      }
+
+      sendCodeBtn.disabled = true;
+      sendCodeBtn.innerHTML = '<span class="loading"></span>送信中...';
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/sendVerificationCode`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            phoneNumber: phoneNumber,
+            method: selectedMethod
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          currentPhoneNumber = phoneNumber;
+          const methodText = selectedMethod === 'sms' ? 'SMS' : '音声通話';
+          showMessage(`${methodText}で認証コードを送信しました`, 'success');
+          sentInfo.textContent = `${phoneNumber} に${methodText}で送信しました`;
+
+          // 認証コード入力セクションを表示
+          verificationSection.classList.add('active');
+          verificationCodeInput.value = '';
+          verificationCodeInput.focus();
+        } else {
+          showMessage(`エラー: ${data.error || '送信に失敗しました'}`, 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('ネットワークエラーが発生しました', 'error');
+      } finally {
+        sendCodeBtn.disabled = false;
+        sendCodeBtn.innerHTML = '認証コードを送信';
+      }
+    }
+
+    // 認証コード検証
+    async function verifyCode() {
+      const code = verificationCodeInput.value.trim();
+
+      if (!code || code.length !== 6) {
+        showMessage('6桁の認証コードを入力してください', 'error');
+        return;
+      }
+
+      verifyCodeBtn.disabled = true;
+      verifyCodeBtn.innerHTML = '<span class="loading"></span>検証中...';
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/verifyCode`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            phoneNumber: currentPhoneNumber,
+            code: code
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          showMessage('✓ 認証に成功しました！', 'success');
+          verificationCodeInput.value = '';
+
+          // 3秒後にリセット
+          setTimeout(() => {
+            resetForm();
+          }, 3000);
+        } else {
+          showMessage(`エラー: ${data.error || '認証に失敗しました'}`, 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('ネットワークエラーが発生しました', 'error');
+      } finally {
+        verifyCodeBtn.disabled = false;
+        verifyCodeBtn.innerHTML = '認証する';
+      }
+    }
+
+    // フォームリセット
+    function resetForm() {
+      verificationSection.classList.remove('active');
+      verificationCodeInput.value = '';
+      currentPhoneNumber = '';
+      messageArea.innerHTML = '';
+    }
+
+    // イベントリスナー
+    sendCodeBtn.addEventListener('click', sendVerificationCode);
+    verifyCodeBtn.addEventListener('click', verifyCode);
+    resendBtn.addEventListener('click', sendVerificationCode);
+
+    // Enterキーで送信
+    phoneNumberInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendVerificationCode();
+    });
+
+    verificationCodeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') verifyCode();
+    });
+
+    // 数字のみ入力を許可
+    verificationCodeInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+  </script>
+</body>
+</html>
