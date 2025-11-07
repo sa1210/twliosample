@@ -2,9 +2,10 @@ const admin = require('firebase-admin');
 const twilio = require('twilio');
 
 // Firebase Admin初期化
-admin.initializeApp({
-  credential: admin.credential.cert(require('./sakuma-pandatest-firebase-adminsdk-fbsvc-b4845a1c5f.json'))
-});
+// Cloud Functions環境では自動的に認証情報が設定されます
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
 
 const db = admin.firestore();
 
