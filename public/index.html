@@ -287,7 +287,12 @@
   </div>
 
   <script>
-    const API_BASE_URL = 'https://asia-northeast1-sakuma-pandatest.cloudfunctions.net';
+    // ========================================
+    // 設定: 以下を自分のプロジェクトに合わせて変更してください
+    // ========================================
+    const PROJECT_ID = 'sakuma-pandatest';  // あなたのGoogle CloudプロジェクトID
+    const REGION = 'asia-northeast1';       // Cloud Functionsのリージョン
+    const API_BASE_URL = `https://${REGION}-${PROJECT_ID}.cloudfunctions.net`;
 
     let selectedMethod = 'sms';
     let currentPhoneNumber = '';

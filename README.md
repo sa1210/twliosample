@@ -96,11 +96,26 @@ gcloud functions deploy verifyCode \
   --gen2
 ```
 
-### 6. Firebase Hostingのデプロイ
+### 6. フロントエンドの設定変更
+
+`public/index.html`を開き、先頭の設定セクションを自分のプロジェクトIDに変更してください：
+
+```javascript
+// ========================================
+// 設定: 以下を自分のプロジェクトに合わせて変更してください
+// ========================================
+const PROJECT_ID = 'YOUR_PROJECT_ID';  // あなたのGoogle CloudプロジェクトID
+const REGION = 'asia-northeast1';      // Cloud Functionsのリージョン
+```
+
+### 7. Firebase Hostingのデプロイ
 
 ```bash
 # Firebase CLIにログイン
 firebase login
+
+# .firebasercのプロジェクトIDも更新（必要に応じて）
+# { "projects": { "default": "YOUR_PROJECT_ID" } }
 
 # Hostingをデプロイ
 firebase deploy --only hosting
@@ -215,14 +230,18 @@ export TWILIO_PHONE_NUMBER="+1..."
 functions-framework --target=sendVerificationCode --port=8080
 ```
 
-## クローン後に必要なファイル
+## クローン後に必要な設定
 
-他の人がこのリポジトリをクローンした場合、以下のファイルを自分で用意する必要があります：
+他の人がこのリポジトリをクローンした場合、以下の設定が必要です：
 
-### 必須
+### 1. 作成が必要なファイル
 - **`.env.yaml`** - Twilioの認証情報を記載（上記セットアップ参照）
 
-### 不要
+### 2. 変更が必要なファイル
+- **`public/index.html`** - PROJECT_IDを自分のプロジェクトIDに変更
+- **`.firebaserc`** (オプション) - プロジェクトIDを自分のものに変更
+
+### 3. 不要なファイル
 - **サービスアカウントJSON** - Cloud Functionsはデフォルト認証を使用するため不要
 - **id.txt** - 開発時のメモファイル（削除済み）
 
